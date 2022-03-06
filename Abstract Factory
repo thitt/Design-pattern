@@ -1,0 +1,91 @@
+// Interface Abstract Factory khai bao tập hợp phương thức
+// trả về kiểu abstract product khác nhau. Các sản phẩm chung
+// nhóm có quan hệ với nhau về chủ đề hoặc một khái niệm cấp cao.
+// Sản phẩm từ một nhóm thường có thể cộng tác với nhau. Nhóm 
+// sản phẩm thường có một hay nhiều biến thể, nhưng sản phẩm của
+// một biến thể này sẽ không tương thích với biến thể khác.
+interface GUIFactory is
+    method createButton():Button
+    method createCheckbox():Checkbox
+
+
+// Concrete factory tạo ra nhóm sản phẩm thuộc về một biến thể.
+// Factory đảm bảo rằng sản phẩm tạo ra luôn tương thích.
+// Signature của phương thức concrete factory trả về 
+// abstract product, trong khi bên trong phương thức,
+// concrete product được tạo ra.
+class WinFactory implements GUIFactory is
+    method createButton():Button is
+        return new WinButton()
+    method createCheckbox():Checkbox is
+        return new WinCheckbox()
+
+// Mỗi concrete factory có một biến thể sản phẩm tương ứng.
+class MacFactory implements GUIFactory is
+    method createButton():Button is
+        return new MacButton()
+    method createCheckbox():Checkbox is
+        return new MacCheckbox()
+
+
+// Mỗi sản phẩm riêng biệt của nhóm sản phẩm nên có một interface
+// cơ sở. Tất cả biết thể của sản phẩm sẽ được triển khai từ 
+// interface này
+interface Button is
+    method paint()
+
+
+// Concrete product được tạo bởi concrete factory tương ứng.
+class WinButton implements Button is
+    method paint() is
+        // Hiển thị button trong Windows
+
+class MacButton implements Button is
+    method paint() is
+        // Hiển thị button trong MacOS
+
+// Đây là interface cơ sở của một sản phẩm khác. Tất cả 
+// sản phẩm có thể tương tác với nhau, nhưng tương tác
+// chỉ khả dụng giữa hai sản phẩm cùng một biến thể.
+interface Checkbox is
+    method paint()
+
+class WinCheckbox implements Checkbox is
+    method paint() is
+        // Hiển thị checkbox trong Windows
+
+class MacCheckbox implements Checkbox is
+    method paint() is
+        // Hiển thị checkbox trong MacOS
+
+
+// Code client làm việc với factory và sản phẩm chỉ thông qua
+// kiểu trừu tượng: GUIFactory, Button và Checkbox. Nó giúp bạn
+// chuyển bất kỳ lớp con nào của factory sang code client mà
+// không làm hỏng nó.
+class Application is
+    private field factory: GUIFactory
+    private field button: Button
+    constructor Application(factory: GUIFactory) is
+        this.factory = factory
+    method createUI() is
+        this.button = factory.createButton()
+    method paint() is
+        button.paint()
+
+
+// Ứng dụng chọn kiểu factory tùy thuộc vào cấu hình hiện tại 
+// hoặc thiết lập môi trường và tạo nó trong thời gian chạy
+// (thường ở giai đoạn khởi tạo).
+class ApplicationConfigurator is
+    method main() is
+        config = readApplicationConfigFile()
+
+        if (config.OS == "Windows") then
+            factory = new WinFactory()
+        else if (config.OS == "Mac") then
+            factory = new MacFactory()
+        else
+            throw new Exception("Error! Unknown operating system.")
+
+        Application app = new Application(factory)
