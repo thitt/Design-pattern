@@ -1,0 +1,56 @@
+// Giả sử bạn có hai lớp với interface tương thích:
+// RoundHole và RoundPeg.
+class RoundHole is
+    constructor RoundHole(radius) { ... }
+
+    method getRadius() is
+        // Trả về bán kính của lỗ.
+
+    method fits(peg: RoundPeg) is
+        return this.getRadius() >= peg.getRadius()
+
+class RoundPeg is
+    constructor RoundPeg(radius) { ... }
+
+    method getRadius() is
+        // Trả về bán kính của chốt.
+
+
+// Nhưng có một lớp không tương thích là: SquarePeg.
+class SquarePeg is
+    constructor SquarePeg(width) { ... }
+
+    method getWidth() is
+        // Trả về độ dài của chốt.
+
+
+// Lớp adapter giúp bạn cho chốt vuông vào vừa lỗ tròn.
+// Nó mở rộng lớp RoundPeg để giúp đối tượng adapter hành
+// động như một chốt tròn.
+class SquarePegAdapter extends RoundPeg is
+    // Thực tế, adapter bao gồm một thực thể của
+    // lớp SquarePeg
+    private field peg: SquarePeg
+
+    constructor SquarePegAdapter(peg: SquarePeg) is
+        this.peg = peg
+
+    method getRadius() is
+        // Apdater giả vờ là một chốt tròn với bán kính
+        // vừa với chốt vuông mà adapter thực sự bọc.
+        return peg.getWidth() * Math.sqrt(2) / 2
+
+
+// Đâu đó trong code client.
+hole = new RoundHole(5)
+rpeg = new RoundPeg(5)
+hole.fits(rpeg) // true
+
+small_sqpeg = new SquarePeg(5)
+large_sqpeg = new SquarePeg(10)
+hole.fits(small_sqpeg) // điều này sẽ không biên dịch (các loại không tương thích)
+
+small_sqpeg_adapter = new SquarePegAdapter(small_sqpeg)
+large_sqpeg_adapter = new SquarePegAdapter(large_sqpeg)
+hole.fits(small_sqpeg_adapter) // true
+hole.fits(large_sqpeg_adapter) // false
